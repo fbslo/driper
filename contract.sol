@@ -5,7 +5,6 @@ contract Dripper {
     address public owner;
     
     uint public start;
-    uint public drip_period = 7 days;
     
     uint256 public unlock_per_second;
     uint256 public already_claimed;
