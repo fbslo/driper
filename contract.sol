@@ -28,12 +28,12 @@ contract Dripper {
         uint256 allowed_to_claim = time_from_start * unlock_per_second;
         
         require(_amount >= (allowed_to_claim - already_claimed), "Claim less!");
+        
+        already_claimed += _amount;
 
         ERC20 token = ERC20(_token);
         token.transfer(owner, _amount);
-        
-        already_claimed += _amount;
-        
+                
         emit Claim(_token, _amount);
     }
 }
