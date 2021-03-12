@@ -3,15 +3,19 @@ pragma solidity ^0.8.2;
 
 contract Dripper {
     address public owner;
-    uint public constant drip_period = 7 days;
-    uint public last_claim;
-    uint256 public max_claim_per_period;
+    
+    uint public start;
+    uint public drip_period = 7 days;
+    
+    uint256 public unlock_per_second;
+    uint256 public already_claimed;
     
     event Claim(address _token, uint256 _amount);
     
-    constructor(uint256 _max_claim) {
+    constructor() {
         owner = msg.sender;
-        max_claim_per_period = _max_claim;
+        start = block.timestamp;
+        unlock_per_second = 636574070000000; //0.00063657407 CUB, 385 per week, 18 decimal places
     }
     
     modifier ownerOnly {
@@ -20,13 +24,15 @@ contract Dripper {
     }
     
     function claim(address _token, uint256 _amount) public ownerOnly {
-        require(block.timestamp > last_claim + drip_period, "Already claimed, wait at least drip_period");
-        require(_amount <= max_claim_per_period, 'Amount should be less than max_claim_per_period');
+        uint256 time_from_start = block.timestamp - start;
+        uint256 allowed_to_claim = time_from_start * unlock_per_second;
         
-        last_claim = block.timestamp;
-        
+        require(_amount >= (allowed_to_claim - already_claimed), "Claim less!");
+
         ERC20 token = ERC20(_token);
         token.transfer(owner, _amount);
+        
+        already_claimed += _amount;
         
         emit Claim(_token, _amount);
     }
