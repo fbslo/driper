@@ -26,9 +26,13 @@ contract Dripper {
         _;
     }
     
-    function claim(address _token, uint256 _amount) public ownerOnly {
+    function claim(address _token, uint256 _amount, bool _claim_all) public ownerOnly {
         uint256 time_since_start = block.timestamp - start;
         uint256 total_allowed_to_claim = time_since_start * unlock_per_second;
+        
+        if (_claim_all){
+            _amount = total_allowed_to_claim - already_claimed;
+        }
         
         require(_amount <= (total_allowed_to_claim - already_claimed), "Claim less!");
         
