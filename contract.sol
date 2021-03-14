@@ -1,6 +1,10 @@
 pragma solidity ^0.8.2;
 //SPDX-License-Identifier: MIT
 
+/*
+* @fbslo's timelock for CUB dev stake
+*/
+
 contract Dripper {
     address public owner;
     
@@ -23,10 +27,10 @@ contract Dripper {
     }
     
     function claim(address _token, uint256 _amount) public ownerOnly {
-        uint256 time_from_start = block.timestamp - start;
-        uint256 allowed_to_claim = time_from_start * unlock_per_second;
+        uint256 time_since_start = block.timestamp - start;
+        uint256 total_allowed_to_claim = time_since_start * unlock_per_second;
         
-        require(_amount <= (allowed_to_claim - already_claimed), "Claim less!");
+        require(_amount <= (total_allowed_to_claim - already_claimed), "Claim less!");
         
         already_claimed += _amount;
 
@@ -34,6 +38,12 @@ contract Dripper {
         token.transfer(owner, _amount);
                 
         emit Claim(_token, _amount);
+    }
+    
+    function getAllowedAmount() public view returns (uint256) {
+        uint256 time_since_start = block.timestamp - start;
+        uint256 total_allowed_to_claim = time_since_start * unlock_per_second;
+        return total_allowed_to_claim - already_claimed;
     }
 }
 
